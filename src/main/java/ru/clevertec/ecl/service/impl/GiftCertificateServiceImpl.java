@@ -1,10 +1,8 @@
 package ru.clevertec.ecl.service.impl;
 
-import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.clevertec.ecl.model.dto.GiftCertificateDto;
 import ru.clevertec.ecl.model.entity.GiftCertificate;
@@ -12,6 +10,7 @@ import ru.clevertec.ecl.model.entity.Tag;
 import ru.clevertec.ecl.model.mapper.GiftCertificateMapper;
 import ru.clevertec.ecl.repository.GiftCertificateRepository;
 import ru.clevertec.ecl.repository.TagRepository;
+import ru.clevertec.ecl.service.GiftCertificateService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,13 +18,14 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
-public class GiftCertificateServiceImpl implements ru.clevertec.ecl.service.GiftCertificateService {
+@Transactional(readOnly = true)
+public class GiftCertificateServiceImpl implements GiftCertificateService {
 
-    private GiftCertificateRepository giftCertificateRepository;
-    private GiftCertificateMapper giftCertificateMapper;
-    private TagRepository tagRepository;
+    private final GiftCertificateRepository giftCertificateRepository;
+    private final GiftCertificateMapper giftCertificateMapper;
+    private final TagRepository tagRepository;
 
     @Transactional
     @Override
@@ -49,8 +49,7 @@ public class GiftCertificateServiceImpl implements ru.clevertec.ecl.service.Gift
     }
 
     @Override
-    public List<GiftCertificateDto> findAllGiftCertificates(int page, int pageSize) {
-        Pageable pageable = PageRequest.of(page, pageSize);
+    public List<GiftCertificateDto> findAllGiftCertificatesPageable(Pageable pageable) {
         List<GiftCertificate> giftCertificates = giftCertificateRepository.findAll(pageable).getContent();
         return giftCertificates.stream()
                 .map(certificate -> giftCertificateMapper.entityToDto(certificate))
@@ -66,16 +65,7 @@ public class GiftCertificateServiceImpl implements ru.clevertec.ecl.service.Gift
     }
 
     @Override
-    public List<GiftCertificateDto> findByParameters(String tagName, String substring, int page, int pageSize,
-                                                     String dateSortType, String nameSortType) {
-        List<Sort.Order> sorts = new ArrayList<>();
-        if (dateSortType != null) {
-            sorts.add(new Sort.Order(Sort.Direction.valueOf(dateSortType), "createDate"));
-        }
-        if (nameSortType != null) {
-            sorts.add(new Sort.Order(Sort.Direction.valueOf(nameSortType), "name"));
-        }
-        Pageable pageable = PageRequest.of(page, pageSize, Sort.by(sorts));
+    public List<GiftCertificateDto> findByParametersPageable(String tagName, String substring, Pageable pageable) {
 
         List<GiftCertificate> giftCertificates = giftCertificateRepository
                 .findByParameters(tagName, substring, pageable);
@@ -85,6 +75,7 @@ public class GiftCertificateServiceImpl implements ru.clevertec.ecl.service.Gift
                 .toList();
     }
 
+    @Transactional
     @Override
     public GiftCertificateDto updateGiftCertificateById(long id, GiftCertificateDto giftCertificateDto) {
         GiftCertificate certificateForUpdate = giftCertificateRepository.findById(id)
@@ -111,6 +102,7 @@ public class GiftCertificateServiceImpl implements ru.clevertec.ecl.service.Gift
         return giftCertificateMapper.entityToDto(updatedUser);
     }
 
+    @Transactional
     @Override
     public void deleteGiftCertificateById(long id) {
         giftCertificateRepository.deleteById(id);

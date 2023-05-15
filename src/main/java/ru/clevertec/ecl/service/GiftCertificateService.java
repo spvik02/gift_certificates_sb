@@ -1,5 +1,6 @@
 package ru.clevertec.ecl.service;
 
+import org.springframework.data.domain.Pageable;
 import ru.clevertec.ecl.model.dto.GiftCertificateDto;
 
 import java.util.List;
@@ -8,12 +9,11 @@ public interface GiftCertificateService {
 
     GiftCertificateDto saveGiftCertificate(GiftCertificateDto giftCertificateDto);
 
-    List<GiftCertificateDto> findAllGiftCertificates(int page, int pageSize);
+    List<GiftCertificateDto> findAllGiftCertificatesPageable(Pageable pageable);
 
     GiftCertificateDto findGiftCertificateById(long id);
 
-    List<GiftCertificateDto> findByParameters(String tagName, String substring, int page, int pageSize,
-                                              String dateSortType, String nameSortType);
+    List<GiftCertificateDto> findByParametersPageable(String tagName, String substring, Pageable pageable);
 
     GiftCertificateDto updateGiftCertificateById(long id, GiftCertificateDto giftCertificateDto);
 

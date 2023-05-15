@@ -1,6 +1,8 @@
 package ru.clevertec.ecl.controller;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -10,7 +12,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import ru.clevertec.ecl.model.dto.TagDto;
@@ -19,11 +20,11 @@ import ru.clevertec.ecl.service.TagService;
 import java.util.List;
 
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/api/tags")
 public class TagController {
 
-    private TagService tagService;
+    private final TagService tagService;
 
     /**
      * Creates new Tag with provided data
@@ -40,16 +41,13 @@ public class TagController {
     /**
      * Returns list of Tag within the specified range
      *
-     * @param page     value in range [0..n]
-     * @param pageSize the number of tags per page
+     * @param pageable
      * @return ResponseEntity with list of tags
      */
     @GetMapping
     @ResponseBody
-    public ResponseEntity<List<TagDto>> findAllTags(
-            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
-            @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize) {
-        List<TagDto> tags = tagService.findAllTags(page, pageSize);
+    public ResponseEntity<List<TagDto>> findAllTags(@PageableDefault(size = 20) Pageable pageable) {
+        List<TagDto> tags = tagService.findAllTagsPageable(pageable);
         return new ResponseEntity<>(tags, HttpStatus.OK);
     }
 

@@ -1,7 +1,7 @@
 package ru.clevertec.ecl.service.impl;
 
-import lombok.AllArgsConstructor;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.clevertec.ecl.model.dto.UserDto;
@@ -13,13 +13,15 @@ import ru.clevertec.ecl.service.UserService;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
-    private UserRepository userRepository;
-    private UserMapper userMapper;
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
+    @Transactional
     @Override
     public UserDto saveUser(UserDto userDto) {
         User savedUser = userRepository.save(userMapper.dtoToEntity(userDto));
@@ -27,8 +29,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> findAllUsers(int page, int pageSize) {
-        Pageable pageable = PageRequest.of(page, pageSize);
+    public List<UserDto> findAllUsersPageable(Pageable pageable) {
         List<User> users = userRepository.findAll(pageable).getContent();
         return users.stream()
                 .map(user -> userMapper.entityToDto(user))

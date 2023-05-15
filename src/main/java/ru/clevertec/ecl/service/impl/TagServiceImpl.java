@@ -1,9 +1,9 @@
 package ru.clevertec.ecl.service.impl;
 
-import lombok.AllArgsConstructor;
-import org.springframework.data.domain.PageRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.clevertec.ecl.model.dto.TagDto;
 import ru.clevertec.ecl.model.entity.Tag;
 import ru.clevertec.ecl.model.mapper.TagMapper;
@@ -14,13 +14,15 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
+@Transactional(readOnly = true)
 public class TagServiceImpl implements TagService {
 
-    private TagRepository tagRepository;
-    private TagMapper tagMapper;
+    private final TagRepository tagRepository;
+    private final TagMapper tagMapper;
 
+    @Transactional
     @Override
     public TagDto saveTag(TagDto tagDto) {
         Tag savedTag = tagRepository.save(tagMapper.dtoToEntity(tagDto));
@@ -28,8 +30,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public List<TagDto> findAllTags(int page, int pageSize) {
-        Pageable pageable = PageRequest.of(page, pageSize);
+    public List<TagDto> findAllTagsPageable(Pageable pageable) {
         List<Tag> tags = tagRepository.findAll(pageable).getContent();
         return tags.stream()
                 .map(tag -> tagMapper.entityToDto(tag))
@@ -50,6 +51,7 @@ public class TagServiceImpl implements TagService {
         return tagMapper.entityToDto(tag);
     }
 
+    @Transactional
     @Override
     public TagDto updateTagById(long id, TagDto tagDto) {
         Tag tagForUpdate = tagRepository.findById(id)
@@ -65,6 +67,7 @@ public class TagServiceImpl implements TagService {
         return tagMapper.entityToDto(updatedTag);
     }
 
+    @Transactional
     @Override
     public void deleteTagById(long id) {
         tagRepository.deleteById(id);

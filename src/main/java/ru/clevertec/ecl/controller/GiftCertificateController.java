@@ -1,6 +1,8 @@
 package ru.clevertec.ecl.controller;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,11 +21,11 @@ import ru.clevertec.ecl.service.GiftCertificateService;
 import java.util.List;
 
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/api/certificates")
 public class GiftCertificateController {
 
-    private GiftCertificateService giftCertificateService;
+    private final GiftCertificateService giftCertificateService;
 
     /**
      * Creates new GiftCertificate with provided data. Creates passed tags if they don't exist
@@ -40,17 +42,14 @@ public class GiftCertificateController {
     /**
      * Returns list of GiftCertificate within the specified range
      *
-     * @param page     value in range [0..n]
-     * @param pageSize the number of certificates per page
+     * @param pageable
      * @return ResponseEntity with list of GiftCertificate
      */
     @GetMapping
-    @ResponseBody
     public ResponseEntity<List<GiftCertificateDto>> findAllGiftCertificates(
-            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
-            @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize
+            @PageableDefault(size = 20) Pageable pageable
     ) {
-        List<GiftCertificateDto> giftCertificates = giftCertificateService.findAllGiftCertificates(page, pageSize);
+        List<GiftCertificateDto> giftCertificates = giftCertificateService.findAllGiftCertificatesPageable(pageable);
         return new ResponseEntity<>(giftCertificates, HttpStatus.OK);
     }
 
@@ -69,25 +68,19 @@ public class GiftCertificateController {
     /**
      * Returns gift certificates filtered and sorted by passed parameters
      *
-     * @param tagName      full tag name
-     * @param substring    part of a string to search by name/description
-     * @param dateSortType ordering type for date (ASC/DESC)
-     * @param nameSortType ordering type for name (ASC/DESC)
-     * @param page         value in range [0..n]
-     * @param pageSize     the number of certificates per page
+     * @param tagName   full tag name
+     * @param substring part of a string to search by name/description
+     * @param pageable
      * @return ResponseEntity with list of certificates matching the passed parameters
      */
     @GetMapping("/filter")
     public ResponseEntity<List<GiftCertificateDto>> findByParameters(
             @RequestParam(value = "tagName", required = false) String tagName,
             @RequestParam(value = "substring", required = false) String substring,
-            @RequestParam(value = "dateSortType", required = false) String dateSortType,
-            @RequestParam(value = "nameSortType", required = false) String nameSortType,
-            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
-            @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize
+            @PageableDefault(size = 20) Pageable pageable
     ) {
         List<GiftCertificateDto> giftCertificates = giftCertificateService
-                .findByParameters(tagName, substring, page, pageSize, dateSortType, nameSortType);
+                .findByParametersPageable(tagName, substring, pageable);
         return new ResponseEntity<>(giftCertificates, HttpStatus.OK);
     }
 

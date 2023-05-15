@@ -1,5 +1,6 @@
 package ru.clevertec.ecl.service;
 
+import org.springframework.data.domain.Pageable;
 import ru.clevertec.ecl.model.dto.TagDto;
 
 import java.util.List;
@@ -8,7 +9,7 @@ public interface TagService {
 
     TagDto saveTag(TagDto tagDto);
 
-    List<TagDto> findAllTags(int page, int pageSize);
+    List<TagDto> findAllTagsPageable(Pageable pageable);
 
     TagDto findTagById(long id);
 
